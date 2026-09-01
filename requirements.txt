@@ -1,4 +1,4 @@
 requests
 python-dotenv
-openai
+groq
 tavily-python

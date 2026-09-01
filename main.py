@@ -1,4 +1,5 @@
 from search_engine.search import search_web
+from search_engine.llm import generate_answer
 
 
 def main():
@@ -14,13 +15,30 @@ def main():
         return
 
     print()
-    print("Searching for:", query)
+    print("Searching the web...")
     print()
 
     results = search_web(query)
 
-    print("SEARCH RESULTS")
-    print("-" * 50)
+    print(f"Found {len(results)} search results.")
+    print()
+    print("Generating answer...")
+    print()
+
+    answer = generate_answer(query, results)
+
+    print("=" * 50)
+    print("                    ANSWER")
+    print("=" * 50)
+    print()
+
+    print(answer)
+
+    print()
+    print("=" * 50)
+    print("                   SOURCES")
+    print("=" * 50)
+    print()
 
     for number, result in enumerate(results, start=1):
         print(f"[{number}] {result['title']}")
