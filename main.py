@@ -12,9 +12,13 @@ def display_sources(results):
     for number, result in enumerate(results, start=1):
         title = result.get("title", "Unknown")
         url = result.get("url", "Unknown")
+        content = result.get("content", "")
+
+        snippet = content[:200].replace("\n", " ")
 
         print(f"[{number}] {title}")
         print(f"     {url}")
+        print(f"     {snippet}...")
         print()
 
 

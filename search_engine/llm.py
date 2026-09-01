@@ -26,12 +26,12 @@ def generate_answer(query, search_results):
 
         context_parts.append(
             f"""
-Source {number}
-Title: {result.get('title', 'Unknown')}
-URL: {result.get('url', 'Unknown')}
-Content:
-{content}
-"""
+            SOURCE [{number}]
+            Title: {result.get('title', 'Unknown')}
+            URL: {result.get('url', 'Unknown')}
+            Content:
+            {content}
+            """
         )
 
     context = "\n".join(context_parts)
@@ -49,11 +49,16 @@ Content:
 
     RULES:
     1. Give a clear and useful answer.
-    2. Base your answer on the provided search results.
+    2. Base your answer only on the provided search results.
     3. Do not invent information.
-    4. If the sources disagree, mention the disagreement.
-    5. If there is not enough information to answer confidently, say so.
-    6. Keep the answer reasonably concise.
+    4. Add a citation like [1], [2], or [3] after claims that are supported by a source.
+    5. The citation number must match the source number provided above.
+    6. You may use multiple citations such as [1][3] when multiple sources support a claim.
+    7. If the sources disagree, mention the disagreement and cite the relevant sources.
+    8. If there is not enough information to answer confidently, say so.
+    9. Do not create citations that do not exist.
+    10. Do not include a separate sources section. The Python program will display the sources.
+    11. Keep the answer reasonably concise.
     """
 
     try:
