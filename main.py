@@ -20,6 +20,10 @@ def main():
 
     results = search_web(query)
 
+    if not results:
+        print("No search results were found.")
+        return
+
     print(f"Found {len(results)} search results.")
     print()
     print("Generating answer...")

@@ -13,5 +13,5 @@ A command-line custom search engine built with Python, web search APIs, and LLM 
 
 - Python
 - REST APIs
-- OpenAI API
+- GROQ API
 - Web Search API

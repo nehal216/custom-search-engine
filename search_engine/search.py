@@ -15,17 +15,15 @@ client = TavilyClient(api_key=api_key)
 
 
 def search_web(query):
-    response = client.search(
-        query=query,
-        max_results=5
-    )
+    try:
+        response = client.search(
+            query=query,
+            max_results=5,
+            search_depth="advanced"
+        )
 
-    return response["results"]
+        return response["results"]
 
-if __name__ == "__main__":
-    results = search_web("What is artificial intelligence?")
-
-    for result in results:
-        print(result["title"])
-        print(result["url"])
-        print()
+    except Exception as error:
+        print(f"Search failed: {error}")
+        return []

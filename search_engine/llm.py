@@ -15,47 +15,62 @@ client = Groq(api_key=api_key)
 
 
 def generate_answer(query, search_results):
-    context = ""
+    context_parts = []
 
     for number, result in enumerate(search_results, start=1):
-        context += (
-            f"Source {number}:\n"
-            f"Title: {result['title']}\n"
-            f"URL: {result['url']}\n"
-            f"Content: {result.get('content', '')}\n\n"
+        content = result.get("content", "")
+
+        # Limit each result to avoid sending excessive text
+        content = content[:3000]
+
+        context_parts.append(
+            f"""
+Source {number}
+Title: {result.get('title', 'Unknown')}
+URL: {result.get('url', 'Unknown')}
+Content:
+{content}
+"""
         )
 
+    context = "\n".join(context_parts)
+
     prompt = f"""
-You are an AI search assistant.
+    You are an AI search assistant.
 
-Answer the user's question using the provided web search results.
+    Answer the user's question using the web search results provided below.
 
-User question:
-{query}
+    USER QUESTION:
+    {query}
 
-Web search results:
-{context}
+    WEB SEARCH RESULTS:
+    {context}
 
-Instructions:
-- Give a clear and concise answer.
-- Use the search results as your primary source of information.
-- Do not invent facts that are not supported by the results.
-- If the search results do not contain enough information, say so.
-- Do not include a separate sources list. The Python program will display the sources.
-"""
+    RULES:
+    1. Give a clear and useful answer.
+    2. Base your answer on the provided search results.
+    3. Do not invent information.
+    4. If the sources disagree, mention the disagreement.
+    5. If there is not enough information to answer confidently, say so.
+    6. Keep the answer reasonably concise.
+    """
 
-    response = client.chat.completions.create(
+    try:
+        response = client.chat.completions.create(
         model="openai/gpt-oss-20b",
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful AI search assistant."
+                "content": "You are a helpful and reliable AI search assistant."
             },
             {
                 "role": "user",
                 "content": prompt
             }
         ]
-    )
+        )
 
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+
+    except Exception as error:
+        return f"Unable to generate an AI answer: {error}"
