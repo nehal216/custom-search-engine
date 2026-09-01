@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
+MAX_CONTENT_LENGTH = 3000
 
 load_dotenv()
 
@@ -21,7 +22,7 @@ def generate_answer(query, search_results):
         content = result.get("content", "")
 
         # Limit each result to avoid sending excessive text
-        content = content[:3000]
+        content = content[:MAX_CONTENT_LENGTH]
 
         context_parts.append(
             f"""

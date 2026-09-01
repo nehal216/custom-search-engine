@@ -14,11 +14,11 @@ if not api_key:
 client = TavilyClient(api_key=api_key)
 
 
-def search_web(query):
+def search_web(query, max_results=5):
     try:
         response = client.search(
             query=query,
-            max_results=5,
+            max_results=max_results,
             search_depth="advanced"
         )
 
