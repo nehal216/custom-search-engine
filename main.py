@@ -1,6 +1,6 @@
 from search_engine.search import search_web
 from search_engine.llm import generate_answer
-
+from search_engine.ranking import rank_results
 
 def display_sources(results):
     print()
@@ -13,10 +13,12 @@ def display_sources(results):
         title = result.get("title", "Unknown")
         url = result.get("url", "Unknown")
         content = result.get("content", "")
+        score = result.get("score", 0)
 
         snippet = content[:200].replace("\n", " ")
 
         print(f"[{number}] {title}")
+        print(f"     Relevance score: {score:.2f}")
         print(f"     {url}")
         print(f"     {snippet}...")
         print()
@@ -73,11 +75,14 @@ def main():
             print()
             continue
 
-        print(f"Found {len(results)} results.")
+        ranked_results = rank_results(results)
+
+        print(f"Found {len(results)} search results.")
+        print(f"Using the top {len(ranked_results)} results.")
         print("Generating answer...")
         print()
 
-        answer = generate_answer(query, results)
+        answer = generate_answer(query, ranked_results)
 
         print("=" * 60)
         print("                          ANSWER")
@@ -86,7 +91,7 @@ def main():
 
         print(answer)
 
-        display_sources(results)
+        display_sources(ranked_results)
 
 
 if __name__ == "__main__":
