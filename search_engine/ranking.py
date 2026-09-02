@@ -5,4 +5,19 @@ def rank_results(results, limit=3):
         reverse=True
     )
 
-    return ranked_results[:limit]
+    selected_results = []
+    seen_urls = set()
+
+    for result in ranked_results:
+        url = result.get("url")
+
+        if url in seen_urls:
+            continue
+
+        selected_results.append(result)
+        seen_urls.add(url)
+
+        if len(selected_results) >= limit:
+            break
+
+    return selected_results

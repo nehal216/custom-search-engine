@@ -1,6 +1,7 @@
 from search_engine.search import search_web
 from search_engine.llm import generate_answer
 from search_engine.ranking import rank_results
+from search_engine.query import analyze_query
 
 def display_sources(results):
     print()
@@ -68,14 +69,23 @@ def main():
         print("Searching the web...")
         print()
 
-        results = search_web(query)
+        search_queries = analyze_query(query)
 
-        if not results:
+        all_results = []
+
+        for search_query in search_queries:
+            print(f"Searching for: {search_query}")
+
+            results = search_web(search_query)
+
+            all_results.extend(results)
+
+        if not all_results:
             print("No search results were found.")
             print()
             continue
 
-        ranked_results = rank_results(results)
+        ranked_results = rank_results(all_results)
 
         print(f"Found {len(results)} search results.")
         print(f"Using the top {len(ranked_results)} results.")
