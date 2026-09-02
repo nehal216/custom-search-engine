@@ -3,77 +3,94 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
+
 MAX_CONTENT_LENGTH = 3000
 
 load_dotenv()
 
-api_key = os.getenv("GROQ_API_KEY")
-
-if not api_key:
-    raise ValueError("GROQ_API_KEY is missing from .env")
-
-client = Groq(api_key=api_key)
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 
-def generate_answer(query, search_results):
+def generate_answer(query, search_results, conversation_history=None):
+
+    if conversation_history is None:
+        conversation_history = []
+
+    # Build search-result context
     context_parts = []
 
     for number, result in enumerate(search_results, start=1):
+
+        title = result.get("title", "Unknown")
+        url = result.get("url", "Unknown")
         content = result.get("content", "")
 
-        # Limit each result to avoid sending excessive text
         content = content[:MAX_CONTENT_LENGTH]
 
         context_parts.append(
             f"""
             SOURCE [{number}]
-            Title: {result.get('title', 'Unknown')}
-            URL: {result.get('url', 'Unknown')}
-            Content:
-            {content}
+            Title: {title}
+            URL: {url}
+            Content: {content}
             """
         )
 
     context = "\n".join(context_parts)
 
+    # Build conversation history
+    history_text = ""
+
+    for message in conversation_history:
+        history_text += (
+            f"{message['role'].upper()}: "
+            f"{message['content']}\n"
+        )
+
+    # Build the prompt
     prompt = f"""
     You are an AI search assistant.
 
-    Answer the user's question using the web search results provided below.
+    Use the conversation history and web search results
+    to answer the user's latest question.
 
-    USER QUESTION:
+    CONVERSATION HISTORY:
+    {history_text}
+
+    LATEST USER QUESTION:
     {query}
 
     WEB SEARCH RESULTS:
     {context}
 
     RULES:
-    1. Give a clear and useful answer.
-    2. Base your answer only on the provided search results.
-    3. Do not invent information.
-    4. Add a citation like [1], [2], or [3] after claims that are supported by a source.
-    5. The citation number must match the source number provided above.
-    6. You may use multiple citations such as [1][3] when multiple sources support a claim.
-    7. If the sources disagree, mention the disagreement and cite the relevant sources.
-    8. If there is not enough information to answer confidently, say so.
+    1. Answer the latest question clearly.
+    2. Use the conversation history to understand references
+    such as "it", "they", "which one", or "that".
+    3. Use the web search results as the primary source of facts.
+    4. Do not invent information.
+    5. Add citations such as [1], [2], or [3] after claims
+    supported by the corresponding source.
+    6. If multiple sources support a claim, use multiple citations.
+    7. If the sources disagree, mention the disagreement.
+    8. If there is not enough information, say so.
     9. Do not create citations that do not exist.
-    10. Do not include a separate sources section. The Python program will display the sources.
+    10. Do not include a separate sources section.
     11. Keep the answer reasonably concise.
     """
 
     try:
+
         response = client.chat.completions.create(
-        model="openai/gpt-oss-20b",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful and reliable AI search assistant."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
         )
 
         return response.choices[0].message.content

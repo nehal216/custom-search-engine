@@ -1,9 +1,11 @@
 from search_engine.search import search_web
 from search_engine.llm import generate_answer
 from search_engine.ranking import rank_results
-from search_engine.query import analyze_query
+from search_engine.query import analyze_query, make_contextual_query
+from search_engine.conversation import Conversation
 
 def display_sources(results):
+
     print()
     print("=" * 60)
     print("                         SOURCES")
@@ -33,6 +35,7 @@ def display_help():
     print()
     print("Commands:")
     print("  help    - Show this help menu")
+    print("  clear   - Clear conversation history")
     print("  exit    - Exit the search engine")
     print()
     print("Anything else is treated as a search query.")
@@ -40,6 +43,8 @@ def display_help():
 
 
 def main():
+
+    conversation = Conversation()
     print("=" * 60)
     print("                  CUSTOM SEARCH ENGINE")
     print("=" * 60)
@@ -60,6 +65,13 @@ def main():
             display_help()
             continue
 
+        if query.lower() == "clear":
+            conversation.clear()
+            print()
+            print("Conversation history cleared.")
+            print()
+            continue
+
         if not query:
             print("Please enter a search query.")
             print()
@@ -69,7 +81,12 @@ def main():
         print("Searching the web...")
         print()
 
-        search_queries = analyze_query(query)
+        contextual_query = make_contextual_query(
+        query,
+        conversation.get_history()
+        )
+
+        search_queries = analyze_query(contextual_query)
 
         all_results = []
 
@@ -92,7 +109,14 @@ def main():
         print("Generating answer...")
         print()
 
-        answer = generate_answer(query, ranked_results)
+        answer = generate_answer(
+            query, 
+            ranked_results,
+            conversation.get_history()
+        )
+
+        conversation.add_message("user", query)
+        conversation.add_message("assistant", answer)
 
         print("=" * 60)
         print("                          ANSWER")
