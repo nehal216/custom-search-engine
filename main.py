@@ -3,6 +3,7 @@ from search_engine.llm import generate_answer
 from search_engine.ranking import rank_results
 from search_engine.query import analyze_query, make_contextual_query
 from search_engine.conversation import Conversation
+from search_engine.validation import validate_citations, remove_invalid_citations
 
 def display_sources(results):
 
@@ -114,6 +115,30 @@ def main():
             ranked_results,
             conversation.get_history()
         )
+
+        valid_citations, invalid_citations = validate_citations(
+            answer,
+            ranked_results
+        )
+
+        if valid_citations:
+            unique_citations = sorted(set(valid_citations))
+
+            print(
+                f"Verified citations: "
+                f"{', '.join(f'[{c}]' for c in unique_citations)}"
+            )
+
+        if invalid_citations:
+            print(
+                f"Warning: invalid citations found: "
+                f"{invalid_citations}"
+            )
+
+            answer = remove_invalid_citations(
+                answer,
+                ranked_results
+            )
 
         conversation.add_message("user", query)
         conversation.add_message("assistant", answer)
