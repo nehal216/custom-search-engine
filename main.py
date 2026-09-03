@@ -5,15 +5,19 @@ from search_engine.query import analyze_query, make_contextual_query
 from search_engine.conversation import Conversation
 from search_engine.validation import validate_citations, remove_invalid_citations
 
-def display_sources(results):
+from colorama import Fore, Style, init
 
+init(autoreset=True)
+
+def display_sources(results):
     print()
-    print("=" * 60)
-    print("                         SOURCES")
-    print("=" * 60)
+    print(Fore.MAGENTA + "=" * 60)
+    print(Fore.MAGENTA + "                         SOURCES")
+    print(Fore.MAGENTA + "=" * 60)
     print()
 
     for number, result in enumerate(results, start=1):
+
         title = result.get("title", "Unknown")
         url = result.get("url", "Unknown")
         content = result.get("content", "")
@@ -21,10 +25,26 @@ def display_sources(results):
 
         snippet = content[:200].replace("\n", " ")
 
-        print(f"[{number}] {title}")
-        print(f"     Relevance score: {score:.2f}")
-        print(f"     {url}")
-        print(f"     {snippet}...")
+        print(
+            Fore.CYAN +
+            f"[{number}] {title}"
+        )
+
+        print(
+            Fore.YELLOW +
+            f"     Relevance score: {score:.2f}"
+        )
+
+        print(
+            Fore.BLUE +
+            f"     {url}"
+        )
+
+        print(
+            Fore.WHITE +
+            f"     {snippet}..."
+        )
+
         print()
 
 
@@ -46,20 +66,26 @@ def display_help():
 def main():
 
     conversation = Conversation()
-    print("=" * 60)
-    print("                  CUSTOM SEARCH ENGINE")
-    print("=" * 60)
     print()
-    print("Search the web and get AI-generated answers.")
-    print("Type 'help' for commands or 'exit' to quit.")
+    print(Fore.CYAN + "=" * 60)
+    print(Fore.CYAN + "              CUSTOM SEARCH ENGINE")
+    print(Fore.CYAN + "=" * 60)
+    print()
+
+    print(Fore.WHITE + "Search the web and get AI-generated answers.")
+    print(
+        Fore.YELLOW +
+        "Type 'help' for commands or 'exit' to quit."
+    )
+
     print()
 
     while True:
-        query = input("Search > ").strip()
+        query = input(Fore.CYAN + "Search > " + Style.RESET_ALL).strip()
 
         if query.lower() == "exit":
             print()
-            print("Goodbye!")
+            print(Fore.CYAN + "Goodbye!")
             break
 
         if query.lower() == "help":
@@ -69,17 +95,17 @@ def main():
         if query.lower() == "clear":
             conversation.clear()
             print()
-            print("Conversation history cleared.")
+            print(Fore.GREEN + "Conversation history cleared.")
             print()
             continue
 
         if not query:
-            print("Please enter a search query.")
+            print(Fore.RED + "Please enter a search query.")
             print()
             continue
 
         print()
-        print("Searching the web...")
+        print(Fore.YELLOW + "Searching the web...")
         print()
 
         contextual_query = make_contextual_query(
@@ -95,18 +121,13 @@ def main():
         all_results = []
 
         for search_query in search_queries:
-            print(f"Searching for: {search_query}")
+            print(Fore.BLUE +f"Searching for: {search_query}")
             results = search_web(search_query)
             all_results.extend(results)
 
         if not all_results:
-            print("\nNo search results were found.")
-            print("Try rephrasing your question.\n")
-            continue
-
-        if not all_results:
-            print("No search results were found.")
-            print()
+            print(Fore.RED + "\nNo search results were found.")
+            print(Fore.YELLOW + "Try rephrasing your question.\n")
             continue
 
         ranked_results = rank_results(
@@ -114,9 +135,9 @@ def main():
             contextual_query
         )
 
-        print(f"Found {len(results)} search results.")
-        print(f"Using the top {len(ranked_results)} results.")
-        print("Generating answer...")
+        print(Fore.GREEN + f"Found {len(all_results)} search results.")
+        print(Fore.GREEN + f"Using the top {len(ranked_results)} results.")
+        print(Fore.YELLOW + "Generating answer...")
         print()
 
         answer = generate_answer(
@@ -157,12 +178,13 @@ def main():
         conversation.add_message("user", query)
         conversation.add_message("assistant", answer)
 
-        print("=" * 60)
-        print("                          ANSWER")
-        print("=" * 60)
+        print()
+        print(Fore.GREEN + "=" * 60)
+        print(Fore.GREEN + "                          ANSWER")
+        print(Fore.GREEN + "=" * 60)
         print()
 
-        print(answer)
+        print(Fore.WHITE + answer)
 
         display_sources(ranked_results)
 
