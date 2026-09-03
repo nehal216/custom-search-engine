@@ -109,7 +109,10 @@ def main():
             print()
             continue
 
-        ranked_results = rank_results(all_results)
+        ranked_results = rank_results(
+            all_results,
+            contextual_query
+        )
 
         print(f"Found {len(results)} search results.")
         print(f"Using the top {len(ranked_results)} results.")

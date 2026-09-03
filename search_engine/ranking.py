@@ -45,7 +45,52 @@ def get_domain(url):
         return ""
 
 
-def rank_results(results, limit=3):
+def calculate_relevance_score(result, query):
+    """
+    Calculate a custom relevance score for a search result.
+    """
+
+    title = result.get("title", "").lower()
+    content = result.get("content", "").lower()
+    query = query.lower()
+
+    score = result.get("score", 0)
+
+    # Split the query into individual words
+    query_words = query.split()
+
+    if not query_words:
+        return score
+
+    # Count how many query words appear in the title
+    title_matches = 0
+
+    for word in query_words:
+        if word in title:
+            title_matches += 1
+
+    # Count how many query words appear in the content
+    content_matches = 0
+
+    for word in query_words:
+        if word in content:
+            content_matches += 1
+
+    # Calculate match percentages
+    title_relevance = title_matches / len(query_words)
+    content_relevance = content_matches / len(query_words)
+
+    # Combine scores
+    final_score = (
+        (score * 0.50)
+        + (title_relevance * 0.30)
+        + (content_relevance * 0.20)
+    )
+
+    return final_score
+
+
+def rank_results(results, query, limit=3):
 
     if not results:
         return []
@@ -61,7 +106,10 @@ def rank_results(results, limit=3):
         # Step 2: Sort by Tavily relevance score
         ranked_results = sorted(
             valid_results,
-            key=lambda result: result.get("score", 0),
+            key=lambda result: calculate_relevance_score(
+                result,
+                query
+            ),
             reverse=True
         )
 
