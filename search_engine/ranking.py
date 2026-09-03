@@ -1,23 +1,34 @@
 def rank_results(results, limit=3):
-    ranked_results = sorted(
-        results,
-        key=lambda result: result.get("score", 0),
-        reverse=True
-    )
 
-    selected_results = []
-    seen_urls = set()
+    if not results:
+        return []
 
-    for result in ranked_results:
-        url = result.get("url")
+    try: 
+        ranked_results = sorted(
+            results,
+            key=lambda result: result.get("score", 0),
+            reverse=True
+        )
 
-        if url in seen_urls:
-            continue
+        selected_results = []
+        seen_urls = set()
 
-        selected_results.append(result)
-        seen_urls.add(url)
+        for result in ranked_results:
+            url = result.get("url")
 
-        if len(selected_results) >= limit:
-            break
+            if url in seen_urls:
+                continue
 
-    return selected_results
+            selected_results.append(result)
+            seen_urls.add(url)
+
+            if len(selected_results) >= limit:
+                break
+
+        return selected_results
+    
+    except Exception as error:
+        print(f"Ranking error: {error}")
+
+        # Fall back to the original results
+        return results

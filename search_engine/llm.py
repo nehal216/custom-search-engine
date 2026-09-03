@@ -93,7 +93,12 @@ def generate_answer(query, search_results, conversation_history=None):
             ]
         )
 
-        return response.choices[0].message.content
+        answer = response.choices[0].message.content
+
+        if not answer:
+            return "Unable to generate an AI answer: empty response."
+
+        return answer
 
     except Exception as error:
         return f"Unable to generate an AI answer: {error}"

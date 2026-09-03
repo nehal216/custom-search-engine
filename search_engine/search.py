@@ -15,15 +15,17 @@ client = TavilyClient(api_key=api_key)
 
 
 def search_web(query, max_results=5):
+
     try:
         response = client.search(
             query=query,
-            max_results=max_results,
-            search_depth="advanced"
+            max_results=max_results
         )
 
-        return response["results"]
+        results = response.get("results", [])
+
+        return results
 
     except Exception as error:
-        print(f"Search failed: {error}")
+        print(f"Search error: {error}")
         return []

@@ -93,10 +93,13 @@ def main():
 
         for search_query in search_queries:
             print(f"Searching for: {search_query}")
-
             results = search_web(search_query)
-
             all_results.extend(results)
+
+        if not all_results:
+            print("\nNo search results were found.")
+            print("Try rephrasing your question.\n")
+            continue
 
         if not all_results:
             print("No search results were found.")
@@ -115,6 +118,11 @@ def main():
             ranked_results,
             conversation.get_history()
         )
+
+        if answer.startswith("Unable to generate an AI answer:"):
+            print("\n" + answer)
+            print()
+            continue
 
         valid_citations, invalid_citations = validate_citations(
             answer,
