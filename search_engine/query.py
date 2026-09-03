@@ -1,5 +1,5 @@
 import re
-
+from search_engine.llm import rewrite_query_with_llm
 
 def clean_query(query):
     query = query.strip()
@@ -28,49 +28,26 @@ def analyze_query(query):
 
 def make_contextual_query(query, conversation_history):
     """
-    Add recent conversation context to follow-up questions.
+    Rewrite a follow-up question into a standalone
+    search query using conversation history.
     """
 
     if not conversation_history:
         return query
 
-    # Get the most recent user message.
-    previous_user_message = None
+    recent_messages = conversation_history[-6:]
 
-    for message in reversed(conversation_history):
-        if message["role"] == "user":
-            previous_user_message = message["content"]
-            break
+    conversation_context = ""
 
-    if not previous_user_message:
-        return query
+    for message in recent_messages:
+        role = message["role"].upper()
+        content = message["content"]
 
-    # Words that usually indicate a follow-up question.
-    follow_up_words = [
-        "it",
-        "its",
-        "they",
-        "them",
-        "their",
-        "this",
-        "that",
-        "these",
-        "those",
-        "he",
-        "she",
-        "which one",
-        "what about",
-        "how about"
-    ]
+        conversation_context += (
+            f"{role}: {content}\n"
+        )
 
-    query_lower = query.lower()
-
-    is_follow_up = any(
-        phrase in query_lower
-        for phrase in follow_up_words
+    return rewrite_query_with_llm(
+        query,
+        conversation_context
     )
-
-    if is_follow_up:
-        return f"{query} Context: {previous_user_message}"
-
-    return query

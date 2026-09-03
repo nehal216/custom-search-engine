@@ -87,6 +87,9 @@ def main():
         conversation.get_history()
         )
 
+        if contextual_query != query:
+            print(f"Rewritten query: {contextual_query}")
+
         search_queries = analyze_query(contextual_query)
 
         all_results = []

@@ -102,3 +102,65 @@ def generate_answer(query, search_results, conversation_history=None):
 
     except Exception as error:
         return f"Unable to generate an AI answer: {error}"
+
+def rewrite_query_with_llm(query, conversation_context):
+    """
+    Rewrite a user's question into a standalone web-search query.
+    """
+
+    prompt = f"""
+        You are a search query rewriting assistant.
+
+        Your job is to rewrite the user's latest question
+        into a clear, standalone search query.
+
+        Use the conversation history to understand references
+        such as:
+        - it
+        - they
+        - them
+        - this
+        - that
+        - which one
+        - the above
+        - the previous one
+
+        CONVERSATION HISTORY:
+        {conversation_context}
+
+        LATEST USER QUESTION:
+        {query}
+
+        RULES:
+        1. Return only the rewritten search query.
+        2. Do not answer the question.
+        3. Do not add explanations.
+        4. Do not add quotation marks.
+        5. Make the query understandable without the conversation history.
+        6. Preserve the user's original intent.
+        7. If the question is already standalone, return it unchanged.
+        """
+
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        rewritten_query = response.choices[0].message.content
+
+        if not rewritten_query:
+            return query
+
+        return rewritten_query.strip()
+
+    except Exception as error:
+        print(f"Query rewriting error: {error}")
+
+        # Fall back to the original query
+        return query
