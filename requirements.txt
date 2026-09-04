@@ -3,3 +3,4 @@ python-dotenv
 groq
 tavily-python
 colorama
+pytest

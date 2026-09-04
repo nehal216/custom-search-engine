@@ -13,7 +13,45 @@ def analyze_query(query):
     if not query:
         return []
 
-    parts = re.split(r"\band\b", query, flags=re.IGNORECASE)
+    # Only split when "and" is connecting two separate questions.
+    # For example:
+    #
+    # "Why is the sky blue and does it look different on Mars?"
+    #
+    # But do NOT split:
+    #
+    # "What are Python and Java used for?"
+
+    question_words = (
+        "what",
+        "why",
+        "how",
+        "when",
+        "where",
+        "who",
+        "which",
+        "does",
+        "do",
+        "did",
+        "is",
+        "are",
+        "can",
+        "could",
+        "would",
+        "should"
+    )
+
+    pattern = (
+        r"\band\s+(?="
+        + "|".join(question_words)
+        + r")\b"
+    )
+
+    parts = re.split(
+        pattern,
+        query,
+        flags=re.IGNORECASE
+    )
 
     queries = []
 
